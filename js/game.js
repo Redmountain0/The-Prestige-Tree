@@ -144,8 +144,12 @@ function layerDataReset(layer, keep = []) {
 	Vue.set(player[layer], "challenges", getStartChallenges(layer))
 
 	layOver(player[layer], getStartLayerData(layer))
-	player[layer].upgrades = []
-	player[layer].milestones = []
+	let resetUpgrade = true
+	if (player.layer2.milestones.includes('0') && layer == 'layer1') resetUpgrade = false
+	if (player.layer3a.milestones.includes('0') && layer == 'layer2') resetUpgrade = false
+	if (player.layer4a.milestones.includes('0') && layer == 'layer3a') resetUpgrade = false
+	if (player.layer4a.milestones.includes('0') && layer == 'layer3b') resetUpgrade = false
+	if (resetUpgrade) player[layer].upgrades = []
 	player[layer].achievements = []
 	player[layer].challenges = getStartChallenges(layer)
 	resetBuyables(layer)
@@ -177,6 +181,8 @@ function generatePoints(layer, diff) {
 var prevOnReset
 
 function doReset(layer, force=false) {
+	if (layer == 'layer1#') {prestigetype = 'Special'} else {prestigetype = 'Normal'}
+	let tempPlayer = JSON.parse(JSON.stringify(player))
 	if (tmp[layer].type == "none") return
 	let row = tmp[layer].row
 	if (!force) {
@@ -229,6 +235,11 @@ function doReset(layer, force=false) {
 
 	updateTemp()
 	updateTemp()
+
+	if (player.layer3a.upgrades.includes(12)) player.layer1.points = player.layer1.points.add(new Decimal(tempPlayer.layer1.points).pow(0.5));
+	if (player.layer3a.upgrades.includes(13)) player.layer2.points = player.layer2.points.add(new Decimal(tempPlayer.layer2.points).pow(0.4));
+	if (player.layer4a.upgrades.includes(12)) player.layer3a.points = player.layer3a.points.add(new Decimal(tempPlayer.layer3a.points).pow(0.35));
+	if (player.layer4a.upgrades.includes(12)) player.layer3b.points = player.layer3b.points.add(new Decimal(tempPlayer.layer3b.points).pow(0.35));
 }
 
 function resetRow(row) {
@@ -372,7 +383,6 @@ function gameLoop(diff) {
 		if (layers[layer].milestones) updateMilestones(layer);
 		if (layers[layer].achievements) updateAchievements(layer)
 	}
-
 }
 
 function hardReset() {
@@ -413,3 +423,7 @@ var interval = setInterval(function() {
 }, 50)
 
 setInterval(function() {needCanvasUpdate = true}, 500)
+
+setInterval(function() {
+	document.body.style.setProperty('--boughtcolor', layers[player.tab].color);
+}, 50)
