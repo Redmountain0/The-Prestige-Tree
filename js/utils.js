@@ -359,20 +359,23 @@ var saveInterval = setInterval(function() {
 // ************ Themes ************
 
 const themes = {
-	1: "aqua"
+	1: "light"
 }
 const theme_names = {
-	aqua: "Aqua"
+	light: "Light"
 }
 
 function changeTheme() {
-	let aqua = player.theme == "aqua"
+	let light = player.theme == "light"
 	colors_theme = colors[player.theme || "default"]
-	document.body.style.setProperty('--background', aqua ? "#001f3f" : "#0f0f0f")
-	document.body.style.setProperty('--background_tooltip', aqua ? "rgba(0, 15, 31, 0.75)" : "rgba(0, 0, 0, 0.75)")
-	document.body.style.setProperty('--color', aqua ? "#bfdfff" : "#dfdfdf")
-	document.body.style.setProperty('--points', aqua ? "#dfefff" : "#ffffff")
-	document.body.style.setProperty("--locked", aqua ? "#c4a7b3" : "#bf8f8f")
+	document.body.style.setProperty('--background', light ? "#dddddd" : "#0f0f0f")
+	document.body.style.setProperty('--background_tooltip', light ? "rgba(200, 200, 200, 0.75)" : "rgba(0, 0, 0, 0.75)")
+	document.body.style.setProperty('--color', light ? "#666666" : "#dfdfdf")
+	document.body.style.setProperty('--points', light ? "#333333" : "#ffffff")
+	document.body.style.setProperty("--locked", light ? "#bf8f8f" : "#bf8f8f")
+	document.body.style.setProperty('--optcolor', light ? "#aaaaaa" : "#dfdfdf")
+	document.body.style.setProperty('--optcolorhover', light ? "#cccccc" : "#439ea3")
+	document.body.style.setProperty('--filter', light ? "brightness(0.8)" : "")
 }
 
 function getThemeName() {

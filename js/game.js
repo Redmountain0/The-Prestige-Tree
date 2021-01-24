@@ -425,5 +425,5 @@ var interval = setInterval(function() {
 setInterval(function() {needCanvasUpdate = true}, 500)
 
 setInterval(function() {
-	document.body.style.setProperty('--boughtcolor', layers[player.tab].color);
+	try {document.body.style.setProperty('--boughtcolor', layers[player.tab].color);} catch {}
 }, 50)

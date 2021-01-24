@@ -1,7 +1,7 @@
 addLayer("achievements", {
     name: "Achievements",
     symbol: "A",
-    color: "#ee9",
+    color: "#EEEE99",
     displayRow: 'side',
     resource: "Achievements achieved",
     startData() { return {
@@ -13,7 +13,7 @@ addLayer("achievements", {
     },
     tabFormat: [
         ["display-text",
-        function() { return `You have achieved <h2 style='text-shadow: 0px 0px 10px #ff6; color: #ee9'>${player.achievements.points}</h2> Achievements`}
+        function() { return `You have achieved <h2 style='text-shadow: 0px 0px 10px #ff6; color: #ee9; filter: var(--filter)'>${player.achievements.points}</h2> Achievements`}
         ], "blank", "blank",
         "achievements",
     ],
