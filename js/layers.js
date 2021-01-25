@@ -129,15 +129,7 @@ addLayer("achievements", {
             name: "Upgrader",
             goalTooltip: "Buy 10 Upgrades",
             doneTooltip: "Buy 10 Upgrades",
-            done() {
-                for (i in layers) {
-                    var upgradelength = 0
-                    if (i.startsWith('layer')) {
-                        upgradelength += player[i].upgrades.length
-                    }
-                }
-                return upgradelength >= 10
-            }
+            done() { return player.statistics.upgrades >= 10 }
         },
         32: {
             name: "Infinity^0.15",
@@ -186,6 +178,12 @@ addLayer("achievements", {
             goalTooltip: "Reach 1e50 Prestige 3a Points",
             doneTooltip: "Reach 1e50 Prestige 3a Points",
             done() { return player.layer3a.points.gte(1e50)}
+        },
+        45: {
+            name: "half Infinity",
+            goalTooltip: "Reach 1e150 Points",
+            doneTooltip: "Reach 1e150 Points",
+            done() { return player.points.gte(1e150)}
         }
     }
 })
