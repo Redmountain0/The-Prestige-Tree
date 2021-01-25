@@ -12,13 +12,19 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.1.1",
+	num: "0.1.2",
 	name: "",
 }
 
-let changelog = `<h1>Changelog:</h1><br>
+let changelog = `<h1>Changelog:</h1><br><br>
+	<h3>v0.1.2</h3><br>
+		- Fixed Some bugs.<br>
+		- Added 4 Achievements.<br>
+		- Added Some Upgrades and Milestones.<br>
+		- Added Statistics Tab.
+	<br><br>
 	<h3>v0.1.1</h3><br>
-		- Added Light Theme.<br>`
+		- Added Light Theme.<br><br>`
 
 let winText = `Congratulations! You have reached the end and beaten this game, but for now...`
 
@@ -41,6 +47,7 @@ function getPointGen() {
 		return new Decimal(0)
 
 	let gainboost = new Decimal(1)
+	let gainexp = new Decimal(1)
 	let gain
 	if (player.layer1.upgrades.includes(11)) gainboost = gainboost.times(2)
 	if (player.layer1.upgrades.includes(12)) gainboost = gainboost.times(3)
@@ -48,12 +55,13 @@ function getPointGen() {
 	if (player.layer1.upgrades.includes(22)) gainboost = gainboost.times(8)
 	if (player.layer2.upgrades.includes(11)) gainboost = gainboost.times(5)
 	if (player.layer2.upgrades.includes(12)) gainboost = gainboost.times(3)
-	if (player.layer2.upgrades.includes(13)) gainboost = gainboost.times(player.layer2.points.pow(0.5).add(1))
+	if (player.layer2.upgrades.includes(13)) gainboost = gainboost.times(player.layer2.points.pow(0.5).add(1).min(1e60))
 	if (player.layer2.upgrades.includes(21)) gainboost = gainboost.times(8)
 	if (player.layer3a.upgrades.includes(11) && player.layer1.resetTime < 1) gainboost = gainboost.times(5)
 	if (player.layer3b.upgrades.includes(11)) gainboost = gainboost.times(new Decimal(player.timePlayed).div(6000).plus(1).log(2).plus(1).pow(2))
 	if (player.layer3b.upgrades.includes(12)) gainboost = gainboost.times(new Decimal(1).add(new Decimal(player['achievements'].achievements.length).pow(1.5).div(5)))
-	if (player.layer4b.upgrades.includes(11)) gainboost = gainboost.times(10)
+	if (player.layer3b.upgrades.includes(21)) gainboost = gainboost.times(player.statistics.milestones.pow(1.5).add(1))
+	if (player.layer4b.upgrades.includes(11)) gainexp = gainexp.times(1.1)
 
 	let achievementboost = new Decimal(1)
 	if (player.achievements.achievements.includes(15)) achievementboost = achievementboost.times(1.2)
@@ -62,7 +70,7 @@ function getPointGen() {
 	gain = new Decimal(1).times(player.layer1.points)
 	gain2 =	player.layer1.points.pow(0.3).times(1e10)
 	gain = gain.min(gain2)
-	return gain.add(1).times(gainboost)
+	return gain.add(1).times(gainboost).pow(gainexp)
 }
 
 // You can add non-layer related variables that should to into "player" and be saved here, along with default values
@@ -75,7 +83,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.points.gte(new Decimal("e80"))
+	return player.points.gte(new Decimal("e140"))
 }
 
 

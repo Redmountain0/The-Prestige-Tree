@@ -1,3 +1,48 @@
+addLayer("statistics", {
+    name: "Statistics", // This is optional, only used in a few places, If absent it just uses the layer id.
+    symbol: "S", // This appears on the layer's node. Default is the id with the first letter capitalized
+    displayRow: 'side', // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
+    startData() { return {
+        unlocked: true,
+        points: new Decimal(0),
+        pointbest: new Decimal(0),
+    }},
+    color: "#FF9999",
+    UpgradeCalc() {
+        var upgradelength = 0
+        for (i in layers) {
+            if (i.startsWith('layer')) {
+                upgradelength += player[i].upgrades.length
+            }
+        }
+        player.statistics.upgrades = new Decimal(upgradelength)
+    },
+    MilestoneCalc() {
+        var milestonelength = 0
+        for (i in layers) {
+            if (i.startsWith('layer')) {
+                milestonelength += player[i].milestones.length
+            }
+        }
+        player.statistics.milestones = new Decimal(milestonelength)
+    },
+    pointBestCalc() {
+        player.statistics.pointbest = player.statistics.pointbest.max(player.points)
+    },
+    tabFormat: [
+        ["display-text",
+        function() { return `You have bought <h2>${player.statistics.upgrades}</h2> upgrades`}
+        ], "blank",
+        ["display-text",
+        function() { return `You has <h2>${player.statistics.milestones}</h2> milestones`}
+        ], "blank",
+        ["display-text",
+        function() { return `Your best Point is <h2>${format(player.statistics.pointbest)}</h2>`}
+        ], "blank",
+    ],
+    layerShown(){return true},
+    tooltip(){return ''},
+})
 addLayer("achievements", {
     name: "Achievements",
     symbol: "A",
@@ -81,7 +126,7 @@ addLayer("achievements", {
             done() { return player.points.gte(1e30)}
         },
         31: {
-            name: "10 Upgrades",
+            name: "Upgrader",
             goalTooltip: "Buy 10 Upgrades",
             doneTooltip: "Buy 10 Upgrades",
             done() {
@@ -98,7 +143,7 @@ addLayer("achievements", {
             name: "Infinity^0.15",
             goalTooltip: "Reach 1e45 Points",
             doneTooltip: "Reach 1e45 Points",
-            done() { return player.points.gte(1e30)}
+            done() { return player.points.gte(1e45)}
         },
         33: {
             name: "Age of Automation",
@@ -118,6 +163,30 @@ addLayer("achievements", {
             doneTooltip: "Reach Prestige 4b",
             done() { return player.layer4b.points.gte(1) }
         },
+        41: {
+            name: "Milestone Collector",
+            goalTooltip: "Collect 5 Milestones (Reward: Unlock more Prestige 1 Upgrades)",
+            doneTooltip: "Collect 5 Milestones (Reward: Unlock more Prestige 1 Upgrades)",
+            done() { return player.statistics.milestones >= 5 }
+        },
+        42: {
+            name: "Extreme Speed",
+            goalTooltip: "Reach 1e90 Points",
+            doneTooltip: "Reach 1e90 Points",
+            done() { return player.points.gte(1e90)}
+        },
+        43: {
+            name: "Maximum Boost",
+            goalTooltip: "Reach 1e120 Prestige 2 Points",
+            doneTooltip: "Reach 1e120 Prestige 2 Points",
+            done() { return player.layer2.points.gte(1e120)}
+        },
+        44: {
+            name: "Maximum Boost II",
+            goalTooltip: "Reach 1e50 Prestige 3a Points",
+            doneTooltip: "Reach 1e50 Prestige 3a Points",
+            done() { return player.layer3a.points.gte(1e50)}
+        }
     }
 })
 addLayer("layer1#", {
@@ -146,7 +215,7 @@ addLayer("layer1", {
         if (player.layer1.upgrades.includes(13)) {player.layer1.exponent = new Decimal(1.2)} else {player.layer1.exponent = new Decimal(1)}
     },
     gainMult() { // Calculate the multiplier for main currency from bonuses
-        mult = new Decimal(1).times(player.layer2.points.pow(0.5).add(1))
+        mult = player.layer2.points.pow(0.5).add(1).min(1e60)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -167,7 +236,7 @@ addLayer("layer1", {
     tabFormat: [
         "main-display",
         ["display-text",
-        function() { return `Boosts Layer 0 by ${format(new Decimal(1).times(player.layer1.points).min(player.layer1.points.pow(0.3).times(1e10)).add(1))}x`}
+        function() { return `Boosts Layer 0 by ${format(player.layer1.points.min(player.layer1.points.pow(0.3).times(1e10)).add(1))}x`}
         ], "blank",
         "prestige-button",
         "blank",
@@ -238,7 +307,7 @@ addLayer("layer2", {
     type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
     exponent: 0.5, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
-        mult = new Decimal(1).times(player.layer3a.points.add(1).pow(0.4)).times(player.layer3b.points.add(1).pow(0.4))
+        mult = new Decimal(1).times(player.layer3a.points.add(1).pow(0.4).min(1e20)).times(player.layer3b.points.add(1).pow(0.4).min(1e20))
         if (player.layer4a.upgrades.includes(11)) {
             mult = mult.times(player.layer4a.points.add(1).pow(0.7))
         }
@@ -262,7 +331,7 @@ addLayer("layer2", {
     tabFormat: [
         "main-display",
         ["display-text",
-        function() { return `Boosts Layer 1 by ${format(player.layer2.points.pow(0.5).add(1))}x`}
+        function() { return `Boosts Layer 1 by ${format(player.layer2.points.pow(0.5).add(1).min(1e60))}x`}
         ], "blank",
         "prestige-button",
         "blank",
@@ -371,7 +440,7 @@ addLayer("layer3a", {
     tabFormat: [
         "main-display",
         ["display-text",
-        function() { return `Boosts Layer 2 by ${format(player.layer3a.points.add(1).pow(0.4))}x`}
+        function() { return `Boosts Layer 2 by ${format(player.layer3a.points.add(1).pow(0.4).min(1e20))}x`}
         ], "blank",
         "prestige-button",
         "blank",
@@ -386,7 +455,7 @@ addLayer("layer3a", {
         "upgrades"
     ],
     upgrades: {
-        rows: 1,
+        rows: 2,
         cols: 3,
         11: {
             title: "Start Boost",
@@ -402,6 +471,13 @@ addLayer("layer3a", {
             title: "Keep Point II",
             description: "Keep ^0.4 of Prestige 2 Point on Prestige",
             cost: new Decimal(3000000),
+        },
+        21: {
+            title: "Milestone Boost",
+            description: "Boost Point gain based on Milestones",
+            cost: new Decimal(1e30),
+            effectDisplay() { return format(player.statistics.milestones.pow(2.5).times(10).add(1)) },
+            unlocked() {return player.layer4a.milestones.includes('1')}
         },
     },
     milestones: {
@@ -457,7 +533,7 @@ addLayer("layer3b", {
     tabFormat: [
         "main-display",
         ["display-text",
-        function() { return `Boosts Layer 2 by ${format(player.layer3b.points.add(1).pow(0.4))}x`}
+        function() { return `Boosts Layer 2 by ${format(player.layer3b.points.add(1).pow(0.4).min(1e20))}x`}
         ], "blank",
         "prestige-button",
         "blank",
@@ -535,7 +611,7 @@ addLayer("layer4a", {
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
-        return new Decimal(1)
+        if (player.layer4a.upgrades.includes(13)) {return new Decimal(1.2)} else {return new Decimal(1)}
     },
     row: 3, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
@@ -571,6 +647,11 @@ addLayer("layer4a", {
             description: "Keep ^0.35 of Prestige 3a,3b Point on Prestige",
             cost: new Decimal(15),
         },
+        13: {
+            title: "Resource Boost",
+            description: "Prestige 4a Point gain ^1.2",
+            cost: new Decimal(10000)
+        }
     },
     milestones: {
         0: {
@@ -579,6 +660,11 @@ addLayer("layer4a", {
             done() { return player[this.layer].points.gte(5) }
         },
         1: {
+            requirementDescription: "50 Prestige 4a Points",
+            effectDescription: "Unlock more Prestige 3a upgrades",
+            done() { return player[this.layer].points.gte(50) }
+        },
+        2: {
             requirementDescription: "10,000,000 Prestige 4a Points",
             effectDescription: "Unlock 1# Layer",
             done() { return player[this.layer].points.gte(10000000) }
@@ -622,7 +708,7 @@ addLayer("layer4b", {
     gainExp() { // Calculate the exponent on main currency from bonuses
         return new Decimal(1)
     },
-    row: 2, // Row the layer is in on the tree (0 is the first row)
+    row: 3, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
         {key: "p", description: "P: Reset for prestige points", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
     ],
@@ -648,7 +734,7 @@ addLayer("layer4b", {
         cols: 3,
         11: {
             title: "Point Boost",
-            description: "Multiply Point gain by x10",
+            description: "Point gain ^1.1",
             cost: new Decimal(2),
         },
     },
